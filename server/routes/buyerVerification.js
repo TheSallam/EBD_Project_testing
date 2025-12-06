@@ -1,5 +1,7 @@
 const express = require('express');
 const BuyerVerification = require('../models/BuyerVerification');
+const { authMiddleware, requireAdmin } = require('../middleware/auth');
+
 const router = express.Router();
 
 // GET all buyer verifications
@@ -14,22 +16,22 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST verify buyer
-router.post('/:buyerId/verify', async (req, res) => {
+// POST verify buyer - ONLY ADMIN
+router.post('/:buyerId/verify', authMiddleware, requireAdmin, async (req, res) => {
   try {
-    const { verifiedBy } = req.body;
+    const buyerId = req.params.buyerId;
 
-    let verification = await BuyerVerification.findOne({ buyerId: req.params.buyerId });
+    let verification = await BuyerVerification.findOne({ buyerId });
 
     if (verification) {
       verification.verifiedStatus = true;
-      verification.verifiedBy = verifiedBy;
+      verification.verifiedBy = req.user._id;  // admin from token
       verification.verificationDate = new Date();
     } else {
       verification = new BuyerVerification({
-        buyerId: req.params.buyerId,
+        buyerId,
         verifiedStatus: true,
-        verifiedBy,
+        verifiedBy: req.user._id,
         verificationDate: new Date()
       });
     }

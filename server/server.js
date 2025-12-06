@@ -17,10 +17,21 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => console.error('❌ MongoDB connection error:', err));
 
 // Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/products', require('./routes/products'));
-app.use('/api/buyer-verification', require('./routes/buyerVerification'));
-app.use('/api/transactions', require('./routes/transactions'));
+const authRoute = require('./routes/auth');
+const productsRoute = require('./routes/products');
+const buyerRoute = require('./routes/buyerVerification');
+const transactionsRoute = require('./routes/transactions');
+
+console.log('authRoute type:', typeof authRoute);
+console.log('productsRoute type:', typeof productsRoute);
+console.log('buyerRoute type:', typeof buyerRoute);
+console.log('transactionsRoute type:', typeof transactionsRoute);
+
+app.use('/api/auth', authRoute);
+app.use('/api/products', productsRoute);
+app.use('/api/buyer-verification', buyerRoute);
+app.use('/api/transactions', transactionsRoute);
+
 
 // Test route
 app.get('/api', (req, res) => {
