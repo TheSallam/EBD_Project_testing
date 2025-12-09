@@ -78,6 +78,7 @@ function FarmerDashboardPage() {
             <CardTitle>Current Listings</CardTitle>
           </CardHeader>
           <CardContent>
+            <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -110,6 +111,7 @@ function FarmerDashboardPage() {
                 ))}
               </TableBody>
             </Table>
+            </div>
           </CardContent>
         </Card>
       </div>

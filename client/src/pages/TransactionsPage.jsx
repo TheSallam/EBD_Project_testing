@@ -86,6 +86,7 @@ function TransactionsPage() {
           </div>
         </CardHeader>
         <CardContent className="px-0">
+          <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent border-border">
@@ -159,6 +160,7 @@ function TransactionsPage() {
               )}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
     </div>

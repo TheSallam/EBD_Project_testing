@@ -46,12 +46,13 @@ function LoginPage() {
   return (
     <div className="flex min-h-[70vh] items-center justify-center">
       
-      <Card className="w-full max-w-md shadow-2xl border border-slate-800 bg-slate-950/70">
+      {/* Updated Card colors */}
+      <Card className="w-full max-w-md shadow-2xl border border-border bg-card">
         <CardHeader>
-          <CardTitle className="text-2xl font-semibold tracking-tight">
+          <CardTitle className="text-2xl font-bold tracking-tight text-foreground">
             Welcome back
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-muted-foreground">
             Sign in to AgriFlow to manage listings and marketplace activity.
           </CardDescription>
         </CardHeader>
@@ -59,13 +60,14 @@ function LoginPage() {
           <form className="space-y-4" onSubmit={handleLogin}>
             <div className="space-y-1.5">
               <Label htmlFor="email">Email</Label>
+              {/* Updated Input colors */}
               <Input
                 id="email"
                 type="email"
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bg-slate-900/60 border-slate-700"
+                className="bg-background border-input text-foreground"
                 placeholder="you@example.com"
                 required
               />
@@ -78,12 +80,12 @@ function LoginPage() {
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bg-slate-900/60 border-slate-700"
+                className="bg-background border-input text-foreground"
                 placeholder="••••••••"
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90" disabled={loading}>
               {loading ? "Logging in..." : "Login"}
             </Button>
           </form>
@@ -93,15 +95,15 @@ function LoginPage() {
             <p
               className={
                 message.type === "success"
-                  ? "text-sm text-emerald-400"
-                  : "text-sm text-red-400"
+                  ? "text-sm text-primary font-medium"
+                  : "text-sm text-destructive font-medium"
               }
             >
               {message.text}
             </p>
           )}
-          <p className="text-xs text-slate-400">
-            Test users: e.g. <code>buyer1@test.com / 123456</code> or any account you
+          <p className="text-xs text-muted-foreground">
+            Test users: e.g. <code className="bg-muted px-1 py-0.5 rounded">buyer1@test.com / 123456</code> or any account you
             created in Postman.
           </p>
         </CardFooter>

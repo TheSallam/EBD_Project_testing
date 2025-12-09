@@ -47,10 +47,11 @@ function RegisterPage() {
 
   return (
     <div className="flex justify-center">
-      <Card className="w-full max-w-md border border-slate-800/80 bg-slate-950/70">
+      {/* Updated Card */}
+      <Card className="w-full max-w-md border border-border bg-card shadow-lg">
         <CardHeader>
-          <CardTitle>Create your account</CardTitle>
-          <CardDescription>Connect to the live API.</CardDescription>
+          <CardTitle className="text-foreground">Create your account</CardTitle>
+          <CardDescription className="text-muted-foreground">Connect to the live API.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <form className="space-y-4" onSubmit={handleSubmit}>
@@ -62,6 +63,7 @@ function RegisterPage() {
                 placeholder="farmer_ahmed"
                 value={form.username}
                 onChange={handleChange}
+                className="bg-background border-input"
                 required
               />
             </div>
@@ -74,6 +76,7 @@ function RegisterPage() {
                 type="email"
                 value={form.email}
                 onChange={handleChange}
+                className="bg-background border-input"
                 required
               />
             </div>
@@ -86,6 +89,7 @@ function RegisterPage() {
                 type="password"
                 value={form.password}
                 onChange={handleChange}
+                className="bg-background border-input"
                 required
               />
             </div>
@@ -96,21 +100,21 @@ function RegisterPage() {
                 name="role"
                 value={form.role}
                 onChange={handleChange}
-                className="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+                className="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground focus:ring-1 focus:ring-primary focus:outline-none"
                 required
               >
                 <option value="farmer">Farmer</option>
                 <option value="buyer">Buyer</option>
               </select>
             </div>
-            <Button className="w-full" type="submit" disabled={loading}>
+            <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90" type="submit" disabled={loading}>
               {loading ? "Registering..." : "Register"}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="flex flex-col gap-2 items-start">
           {message && (
-            <p className={message.type === "success" ? "text-sm text-emerald-400" : "text-sm text-red-400"}>
+            <p className={message.type === "success" ? "text-sm text-primary" : "text-sm text-destructive"}>
               {message.text}
             </p>
           )}
