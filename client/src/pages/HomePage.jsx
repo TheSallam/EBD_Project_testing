@@ -1,66 +1,99 @@
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 function HomePage() {
   return (
-    <div className="space-y-8">
-      <section className="grid gap-6 md:grid-cols-[2fr,1.5fr] items-center">
+    <div className="space-y-10">
+      <section className="grid items-center gap-8 lg:grid-cols-[1.1fr,0.9fr]">
         <div className="space-y-4">
-          <h1 className="text-4xl font-bold text-emerald-500">Digital B2B Marketplace</h1>
-          <h1 className="text-4xl text-emerald-400">Test heading</h1>
-
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            AgriFlow connects smallholder farmers directly with verified buyers,
-            enabling transparent pricing, secure digital payments, and a clear
-            transaction history that can support financial inclusion.
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-100 shadow-sm shadow-emerald-500/20">
+            Real-time, transparent agri-trade
+          </div>
+          <h1 className="text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">
+            Clean, modern marketplace for farmers and verified buyers
+          </h1>
+          <p className="text-base leading-relaxed text-muted-foreground">
+            AgriFlow connects smallholder farmers directly with vetted buyers. Expect clear
+            pricing, secure digital payments, and transaction histories you can trust.
           </p>
           <div className="flex flex-wrap gap-3">
-            <Button size="lg" type="button">
+            <Button size="lg" className="bg-emerald-500 text-emerald-950 hover:bg-emerald-400" type="button">
               Enter as Farmer (static)
             </Button>
-            <Button size="lg" variant="secondary" type="button">
+            <Button size="lg" variant="secondary" className="border border-slate-800/80" type="button">
               Enter as Buyer (static)
             </Button>
           </div>
+          <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-2 rounded-full bg-slate-900/70 px-3 py-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              Instant verifications
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full bg-slate-900/70 px-3 py-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-sky-400" />
+              Clear audit trails
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full bg-slate-900/70 px-3 py-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+              Fair pricing cues
+            </span>
+          </div>
         </div>
 
-        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-4 space-y-3 text-sm">
-          <h2 className="font-medium">Today&apos;s Sample Activity (static)</h2>
-          <div className="flex justify-between text-muted-foreground">
-            <span>Active listings</span>
-            <span className="font-semibold text-foreground">32</span>
-          </div>
-          <div className="flex justify-between text-muted-foreground">
-            <span>Verified buyers</span>
-            <span className="font-semibold text-foreground">12</span>
-          </div>
-          <div className="flex justify-between text-muted-foreground">
-            <span>Transactions this week</span>
-            <span className="font-semibold text-foreground">18</span>
-          </div>
-        </div>
+        <Card className="border border-slate-800/70 bg-slate-950/60 shadow-xl shadow-emerald-500/10">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Today&apos;s activity (static)</CardTitle>
+            <CardDescription>Signal-rich snapshot from our demo data.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-lg border border-slate-800/70 bg-slate-900/80 p-4">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Active listings</p>
+              <p className="mt-2 text-3xl font-semibold text-white">32</p>
+              <p className="text-xs text-emerald-200/80">+4 today</p>
+            </div>
+            <div className="rounded-lg border border-slate-800/70 bg-slate-900/80 p-4">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Verified buyers</p>
+              <p className="mt-2 text-3xl font-semibold text-white">12</p>
+              <p className="text-xs text-emerald-200/80">100% KYC checked</p>
+            </div>
+            <div className="rounded-lg border border-slate-800/70 bg-slate-900/80 p-4">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Transactions this week</p>
+              <p className="mt-2 text-3xl font-semibold text-white">18</p>
+              <p className="text-xs text-emerald-200/80">Stable volume</p>
+            </div>
+            <div className="rounded-lg border border-slate-800/70 bg-slate-900/80 p-4">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Fulfillment score</p>
+              <p className="mt-2 text-3xl font-semibold text-white">94%</p>
+              <p className="text-xs text-emerald-200/80">On-time pickups</p>
+            </div>
+          </CardContent>
+        </Card>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3 text-sm">
-        <div className="rounded-lg border bg-card p-4">
-          <h3 className="font-medium mb-1">For Farmers</h3>
-          <p className="text-muted-foreground">
-            List crops, reach more buyers, and track sales from a simple
-            dashboard.
-          </p>
-        </div>
-        <div className="rounded-lg border bg-card p-4">
-          <h3 className="font-medium mb-1">For Buyers</h3>
-          <p className="text-muted-foreground">
-            Discover verified farmers, compare offers, and request deals in one
-            place.
-          </p>
-        </div>
-        <div className="rounded-lg border bg-card p-4">
-          <h3 className="font-medium mb-1">For Admins</h3>
-          <p className="text-muted-foreground">
-            Verify buyers, monitor transactions, and keep the marketplace safe.
-          </p>
-        </div>
+      <section className="grid gap-4 md:grid-cols-3">
+        {[
+          {
+            title: "For Farmers",
+            body: "List crops quickly, reach verified buyers, and track payouts from one clean dashboard.",
+          },
+          {
+            title: "For Buyers",
+            body: "Discover credible suppliers, compare offers, and request deals with full transparency.",
+          },
+          {
+            title: "For Admins",
+            body: "Review verifications, monitor marketplace health, and keep every transaction auditable.",
+          },
+        ].map((item) => (
+          <Card key={item.title} className="border border-slate-800/70 bg-slate-950/70">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">{item.title}</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground leading-relaxed">
+              {item.body}
+            </CardContent>
+          </Card>
+        ))}
       </section>
     </div>
   );

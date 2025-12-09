@@ -1,15 +1,46 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 function Navbar() {
+  const links = [
+    { to: "/", label: "Home" },
+    { to: "/market", label: "Marketplace" },
+    { to: "/farmer", label: "Farmer" },
+    { to: "/admin/verification", label: "Admin" },
+    { to: "/transactions", label: "Transactions" },
+  ];
+
   return (
-    <nav className="flex gap-4 text-sm text-slate-300">
-      <Link to="/">Home</Link>
-      <Link to="/login">Login</Link>
-      <Link to="/register">Register</Link>
-      <Link to="/farmer">Farmer Dashboard</Link>
-      <Link to="/market">Marketplace</Link>
-      <Link to="/admin/verification">Admin Verification</Link>
-      <Link to="/transactions">Transactions</Link>
+    <div className="flex items-center gap-3">
+      <nav className="flex items-center gap-1 rounded-full border border-slate-800/80 bg-slate-900/70 px-2 py-1 text-sm shadow-lg shadow-emerald-500/5">
+        {links.map((link) => (
+          <NavLink
+            key={link.to}
+            to={link.to}
+            className={({ isActive }) =>
+              `rounded-full px-3 py-1 font-medium transition ${
+                isActive
+                  ? "bg-emerald-500/15 text-emerald-200 ring-1 ring-emerald-400/60"
+                  : "text-slate-200 hover:bg-slate-800/80"
+              }`
+            }
+          >
+            {link.label}
+          </NavLink>
+        ))}
+      </nav>
+      <div className="hidden md:flex items-center gap-2">
+        <NavLink to="/login">
+          <Button variant="ghost" size="sm" className="text-slate-200 hover:text-white">
+            Login
+          </Button>
+        </NavLink>
+        <NavLink to="/register">
+          <Button size="sm" className="bg-emerald-500 text-emerald-950 hover:bg-emerald-400">
+            Get Started
+          </Button>
+        </NavLink>
+      </div>
     </nav>
   );
 }
