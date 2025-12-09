@@ -11,21 +11,30 @@ function BuyerMarketplacePage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // State to track input quantity for EACH product: { [productId]: quantity }
+  const [quantities, setQuantities] = useState({}); 
+
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 6;
 
+  // Refresh function to reload data after purchase
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      // NOTE: Your backend GET /products only returns isAvailable: true
+      // So products with 0 qty will automatically disappear.
+      const res = await api.get("/products");
+      setProducts(res.data);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to load products.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await api.get("/products");
-        setProducts(res.data);
-      } catch (err) {
-        setError(err.response?.data?.message || "Failed to load products.");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchProducts();
   }, []);
 
@@ -44,13 +53,38 @@ function BuyerMarketplacePage() {
 
   const totalPages = Math.max(1, Math.ceil(filtered.total / pageSize));
 
-  const handleRequest = async (productId) => {
+  // Helper to handle input changes for specific cards
+  const handleQtyChange = (pid, val) => {
+    setQuantities(prev => ({ ...prev, [pid]: val }));
+  };
+
+  const handleRequest = async (product) => {
+    // Get quantity from state, default to 0 if empty
+    const qty = Number(quantities[product._id] || 0);
+
+    // Frontend Validation
+    if (qty <= 0) {
+      toast({ variant: "destructive", title: "Invalid quantity", description: "Please enter a valid amount greater than 0." });
+      return;
+    }
+    if (qty > product.quantity) {
+      toast({ variant: "destructive", title: "Stock exceeded", description: `Only ${product.quantity} kgs available.` });
+      return;
+    }
+
     try {
-      await api.post("/transactions", { productId, quantityPurchased: 1 });
-      toast({ title: "Request sent", description: "Transaction recorded with qty 1." });
+      await api.post("/transactions", { productId: product._id, quantityPurchased: qty });
+      
+      toast({ title: "Purchase successful!", description: `Bought ${qty}kg of ${product.productName}` });
+      
+      // Clear input for this product
+      handleQtyChange(product._id, "");
+      
+      // Reload products to update stock / remove empty items
+      fetchProducts();
     } catch (err) {
       const msg = err.response?.data?.message || "Request failed.";
-      toast({ title: "Request failed", description: msg });
+      toast({ variant: "destructive", title: "Request failed", description: msg });
     }
   };
 
@@ -61,7 +95,7 @@ function BuyerMarketplacePage() {
           <p className="text-xs uppercase tracking-[0.25em] text-emerald-200/70">Buyer view</p>
           <h2 className="text-3xl font-semibold tracking-tight">Marketplace</h2>
           <p className="text-sm text-muted-foreground">
-            Browse static sample listings from smallholder farmers in Egypt.
+            Browse listings. Listings disappear when stock runs out.
           </p>
         </div>
 
@@ -79,93 +113,89 @@ function BuyerMarketplacePage() {
               }}
             />
           </div>
-          <Button
-            type="button"
-            className="md:self-end"
-            onClick={() => setPage(1)}
-          >
-            Apply filter
-          </Button>
         </form>
       </header>
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {loading && (
-          <Card className="border border-slate-800/80 bg-slate-950/70 p-6">
-            <p className="text-sm text-muted-foreground">Loading listings…</p>
-          </Card>
-        )}
-        {error && !loading && (
-          <Card className="border border-red-400/40 bg-red-500/5 p-6">
-            <p className="text-sm text-red-300">{error}</p>
-          </Card>
-        )}
+        {loading && <p className="text-sm text-muted-foreground">Loading listings…</p>}
+        
         {!loading && !error && products.length === 0 && (
-          <Card className="border border-slate-800/80 bg-slate-950/70 p-6">
-            <p className="text-sm text-muted-foreground">No products available yet.</p>
-          </Card>
+          <p className="text-sm text-muted-foreground">No products available right now.</p>
         )}
-        {filtered.data.map((p) => (
-          <Card
-            key={p._id || p.id}
-            className="flex flex-col justify-between border border-slate-800/80 bg-slate-950/70 shadow-sm shadow-emerald-500/5"
-          >
-            <div>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center justify-between text-lg">
-                  <span>{p.productName}</span>
-                  <span className="text-xs font-normal text-muted-foreground">
-                    Farmer: {p.farmerId?.username || p.farmer || "N/A"}
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <p className="flex items-baseline gap-2">
-                  <span className="text-2xl font-semibold text-white">{p.pricePerUnit} EGP</span>
-                  <span className="text-muted-foreground">per kg</span>
-                </p>
-                <p className="text-muted-foreground">Available quantity: {p.quantity} kg</p>
-                <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                  <span className="rounded-full bg-slate-900/80 px-3 py-1">Cold chain ready</span>
-                  <span className="rounded-full bg-slate-900/80 px-3 py-1">Cashless payout</span>
-                </div>
-              </CardContent>
-            </div>
-            <CardFooter>
-              <Button
-                variant="secondary"
-                className="w-full"
-                type="button"
-                onClick={() => handleRequest(p._id || p.id)}
-              >
-                Request Offer
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
+
+        {filtered.data.map((p) => {
+          // Calculate total price preview based on input
+          const inputQty = quantities[p._id] || 0;
+          const totalPreview = (inputQty * p.pricePerUnit).toFixed(1);
+
+          return (
+            <Card
+              key={p._id || p.id}
+              className="flex flex-col justify-between border border-slate-800/80 bg-slate-950/70 shadow-sm shadow-emerald-500/5"
+            >
+              <div>
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center justify-between text-lg">
+                    <span>{p.productName}</span>
+                    <span className="text-xs font-normal text-muted-foreground">
+                      {p.farmerId?.username || "Farmer"}
+                    </span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 text-sm">
+                  <div className="flex justify-between items-baseline">
+                    <p className="flex items-baseline gap-2">
+                      <span className="text-2xl font-semibold text-white">{p.pricePerUnit} EGP</span>
+                      <span className="text-muted-foreground">/ kg</span>
+                    </p>
+                    <span className="text-xs font-medium text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded">
+                      {p.quantity} kg left
+                    </span>
+                  </div>
+                  
+                  {/* Quantity Input Area */}
+                  <div className="space-y-2 pt-2 border-t border-slate-800">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor={`qty-${p._id}`} className="text-xs text-muted-foreground">
+                        Buy Quantity (kg)
+                      </Label>
+                      {inputQty > 0 && (
+                        <span className="text-xs text-white">Total: {totalPreview} EGP</span>
+                      )}
+                    </div>
+                    <Input 
+                      id={`qty-${p._id}`}
+                      type="number" 
+                      placeholder="Amount..." 
+                      className="bg-slate-900 border-slate-700"
+                      min="1"
+                      max={p.quantity}
+                      value={quantities[p._id] || ""}
+                      onChange={(e) => handleQtyChange(p._id, e.target.value)}
+                    />
+                  </div>
+                </CardContent>
+              </div>
+              <CardFooter>
+                <Button
+                  variant="secondary"
+                  className="w-full bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-200 border border-emerald-600/20"
+                  type="button"
+                  onClick={() => handleRequest(p)}
+                >
+                  Confirm Purchase
+                </Button>
+              </CardFooter>
+            </Card>
+          );
+        })}
       </section>
 
       {!loading && !error && filtered.total > pageSize && (
         <div className="flex items-center justify-end gap-3 text-sm text-muted-foreground">
-          <span>
-            Page {page} / {totalPages}
-          </span>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-          >
-            Prev
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-          >
-            Next
-          </Button>
+          <span>Page {page} / {totalPages}</span>
+          <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Prev</Button>
+          <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>Next</Button>
         </div>
       )}
     </div>
