@@ -1,11 +1,36 @@
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useAuthUser } from "@/lib/auth";
+import { api } from "@/lib/api";
 
 function HomePage() {
   const navigate = useNavigate();
   const user = useAuthUser();
+  
+  // State for dynamic stats
+  const [stats, setStats] = useState({
+    activeListings: 0,
+    verifiedBuyers: 0,
+    recentTransactions: 0,
+    totalRevenue: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await api.get("/stats");
+        setStats(res.data);
+      } catch (err) {
+        console.error("Failed to load stats", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
 
   const goFarmer = () => navigate("/farmer");
   const goBuyer = () => navigate("/market");
@@ -22,7 +47,7 @@ function HomePage() {
             Clean, modern marketplace for farmers, buyers, and admins
           </h1>
           <p className="text-base leading-relaxed text-muted-foreground">
-            AgriFlow connects smallholder farmers directly with vetted buyers. Clear pricing, secure payments,
+            AgriFlow connects smallholder farmers directly with verified buyers. Clear pricing, secure payments,
             verifications, and transaction history all in one place.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -55,48 +80,52 @@ function HomePage() {
               </Button>
             )}
           </div>
-          <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-2 rounded-full bg-slate-900/70 px-3 py-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              Instant verifications
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full bg-slate-900/70 px-3 py-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-sky-400" />
-              Clear audit trails
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full bg-slate-900/70 px-3 py-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-              Fair pricing cues
-            </span>
-          </div>
         </div>
 
+        {/* Dynamic Stats Card */}
         <Card className="border border-slate-800/70 bg-slate-950/60 shadow-xl shadow-emerald-500/10">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Today&apos;s activity (static)</CardTitle>
-            <CardDescription>Signal-rich snapshot from our demo data.</CardDescription>
+            <CardTitle className="text-lg">Live Market Activity</CardTitle>
+            <CardDescription>Real-time data from the platform.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
+            
+            {/* Active Listings */}
             <div className="rounded-lg border border-slate-800/70 bg-slate-900/80 p-4">
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Active listings</p>
-              <p className="mt-2 text-3xl font-semibold text-white">32</p>
-              <p className="text-xs text-emerald-200/80">+4 today</p>
+              <p className="mt-2 text-3xl font-semibold text-white">
+                {loading ? "-" : stats.activeListings}
+              </p>
+              <p className="text-xs text-emerald-200/80">Available now</p>
             </div>
+
+            {/* Verified Buyers */}
             <div className="rounded-lg border border-slate-800/70 bg-slate-900/80 p-4">
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Verified buyers</p>
-              <p className="mt-2 text-3xl font-semibold text-white">12</p>
-              <p className="text-xs text-emerald-200/80">100% KYC checked</p>
+              <p className="mt-2 text-3xl font-semibold text-white">
+                {loading ? "-" : stats.verifiedBuyers}
+              </p>
+              <p className="text-xs text-emerald-200/80">KYC Approved</p>
             </div>
+
+            {/* Transactions (Week) */}
             <div className="rounded-lg border border-slate-800/70 bg-slate-900/80 p-4">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">Transactions this week</p>
-              <p className="mt-2 text-3xl font-semibold text-white">18</p>
-              <p className="text-xs text-emerald-200/80">Stable volume</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Transactions (7d)</p>
+              <p className="mt-2 text-3xl font-semibold text-white">
+                {loading ? "-" : stats.recentTransactions}
+              </p>
+              <p className="text-xs text-emerald-200/80">Volume this week</p>
             </div>
+
+            {/* Total Revenue */}
             <div className="rounded-lg border border-slate-800/70 bg-slate-900/80 p-4">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">Fulfillment score</p>
-              <p className="mt-2 text-3xl font-semibold text-white">94%</p>
-              <p className="text-xs text-emerald-200/80">On-time pickups</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Total Revenue</p>
+              <p className="mt-2 text-3xl font-semibold text-white">
+                {loading ? "-" : `${stats.totalRevenue.toLocaleString()} EGP`}
+              </p>
+              <p className="text-xs text-emerald-200/80">Lifetime volume</p>
             </div>
+
           </CardContent>
         </Card>
       </section>

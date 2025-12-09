@@ -4,6 +4,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const statsRoute = require('./routes/stats'); // Add this
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.use('/api/auth', authRoute);
 app.use('/api/products', productsRoute);
 app.use('/api/buyer-verification', buyerRoute);
 app.use('/api/transactions', transactionsRoute);
+app.use('/api/stats', statsRoute);
 
 // Healthcheck
 app.get('/api/health', (req, res) => {

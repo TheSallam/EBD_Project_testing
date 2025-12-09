@@ -4,12 +4,32 @@ const Product = require('../models/Product');
 const { authMiddleware, requireRole } = require('../middleware/auth');
 const router = express.Router();
 
-// GET all transactions
-router.get('/', async (req, res) => {
+// GET transactions (Filtered by Role)
+router.get('/', authMiddleware, async (req, res) => {
   try {
-    const transactions = await Transaction.find()
-      .populate('buyerId', 'username')
-      .populate('productId', 'productName pricePerUnit');
+    let query = {};
+
+    // 1. Logic for Farmers: Find their products, then find transactions for those products
+    if (req.user.role === 'farmer') {
+      const myProducts = await Product.find({ farmerId: req.user._id }).select('_id');
+      const productIds = myProducts.map(p => p._id);
+      query = { productId: { $in: productIds } };
+    } 
+    // 2. Logic for Buyers: Only see their own purchases
+    else if (req.user.role === 'buyer') {
+      query = { buyerId: req.user._id };
+    }
+    // 3. Admins see everything (query remains empty {})
+
+    const transactions = await Transaction.find(query)
+      .populate('buyerId', 'username email') // Show who bought it
+      .populate({
+        path: 'productId',
+        select: 'productName pricePerUnit farmerId',
+        populate: { path: 'farmerId', select: 'username' } // Show who sold it
+      })
+      .sort({ transactionDate: -1 }); // Newest first
+
     res.json(transactions);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
