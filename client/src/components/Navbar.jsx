@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { logout, useAuthUser } from "@/lib/auth";
+import { ThemeToggle } from "./ThemeToggle"; // Import the toggle
 
 function Navbar() {
   const navigate = useNavigate();
@@ -21,7 +22,8 @@ function Navbar() {
 
   return (
     <nav className="flex items-center gap-3">
-      <div className="flex items-center gap-1 rounded-full border border-slate-800/80 bg-slate-900/70 px-2 py-1 text-sm shadow-lg shadow-emerald-500/5">
+      {/* Updated container colors to use variables */}
+      <div className="flex items-center gap-1 rounded-full border border-border bg-card/80 backdrop-blur-sm px-2 py-1 text-sm shadow-sm">
         {links.map((link) => (
           <NavLink
             key={link.to}
@@ -29,8 +31,8 @@ function Navbar() {
             className={({ isActive }) =>
               `rounded-full px-3 py-1 font-medium transition ${
                 isActive
-                  ? "bg-emerald-500/15 text-emerald-200 ring-1 ring-emerald-400/60"
-                  : "text-slate-200 hover:bg-slate-800/80"
+                  ? "bg-primary/15 text-primary ring-1 ring-primary/40"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
               }`
             }
           >
@@ -38,32 +40,36 @@ function Navbar() {
           </NavLink>
         ))}
       </div>
-      <div className="hidden md:flex items-center gap-2">
+
+      <div className="flex items-center gap-2">
+        {/* Insert Toggle Button */}
+        <ThemeToggle />
+
         {user ? (
-          <>
+          <div className="hidden md:flex items-center gap-2">
             <span className="text-xs text-muted-foreground">Hi, {user.username}</span>
             <Button
               variant="ghost"
               size="sm"
-              className="text-slate-200 hover:text-white"
+              className="text-muted-foreground hover:text-foreground"
               onClick={handleLogout}
             >
               Logout
             </Button>
-          </>
+          </div>
         ) : (
-          <>
+          <div className="hidden md:flex items-center gap-2">
             <NavLink to="/login">
-              <Button variant="ghost" size="sm" className="text-slate-200 hover:text-white">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
                 Login
               </Button>
             </NavLink>
             <NavLink to="/register">
-              <Button size="sm" className="bg-emerald-500 text-emerald-950 hover:bg-emerald-400">
+              <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
                 Get Started
               </Button>
             </NavLink>
-          </>
+          </div>
         )}
       </div>
     </nav>

@@ -9,7 +9,6 @@ function HomePage() {
   const navigate = useNavigate();
   const user = useAuthUser();
   
-  // State for dynamic stats
   const [stats, setStats] = useState({
     activeListings: 0,
     verifiedBuyers: 0,
@@ -40,10 +39,11 @@ function HomePage() {
     <div className="space-y-10">
       <section className="grid items-center gap-8 lg:grid-cols-[1.1fr,0.9fr]">
         <div className="space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-100 shadow-sm shadow-emerald-500/20">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary shadow-sm">
             Real-time, transparent agri-trade
           </div>
-          <h1 className="text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">
+          {/* Changed text-white to text-foreground */}
+          <h1 className="text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl">
             Clean, modern marketplace for farmers, buyers, and admins
           </h1>
           <p className="text-base leading-relaxed text-muted-foreground">
@@ -53,7 +53,7 @@ function HomePage() {
           <div className="flex flex-wrap gap-3">
             <Button
               size="lg"
-              className="bg-emerald-500 text-emerald-950 hover:bg-emerald-400"
+              className="bg-emerald-600 text-white hover:bg-emerald-500" 
               type="button"
               onClick={goFarmer}
             >
@@ -61,8 +61,8 @@ function HomePage() {
             </Button>
             <Button
               size="lg"
-              variant="secondary"
-              className="border border-slate-800/80"
+              variant="outline"
+              className="border-border hover:bg-accent hover:text-accent-foreground"
               type="button"
               onClick={goBuyer}
             >
@@ -72,7 +72,7 @@ function HomePage() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border border-emerald-400/50 text-emerald-100"
+                className="border-primary/30 text-primary hover:bg-primary/5"
                 type="button"
                 onClick={goAdmin}
               >
@@ -82,55 +82,52 @@ function HomePage() {
           </div>
         </div>
 
-        {/* Dynamic Stats Card */}
-        <Card className="border border-slate-800/70 bg-slate-950/60 shadow-xl shadow-emerald-500/10">
+        {/* Updated Card colors: bg-card, border-border */}
+        <Card className="border border-border bg-card/50 shadow-xl shadow-primary/5 backdrop-blur-sm">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg">Live Market Activity</CardTitle>
             <CardDescription>Real-time data from the platform.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             
-            {/* Active Listings */}
-            <div className="rounded-lg border border-slate-800/70 bg-slate-900/80 p-4">
+            {/* Stat Box */}
+            <div className="rounded-lg border border-border bg-background p-4">
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Active listings</p>
-              <p className="mt-2 text-3xl font-semibold text-white">
+              <p className="mt-2 text-3xl font-bold text-foreground">
                 {loading ? "-" : stats.activeListings}
               </p>
-              <p className="text-xs text-emerald-200/80">Available now</p>
+              <p className="text-xs text-primary">Available now</p>
             </div>
 
-            {/* Verified Buyers */}
-            <div className="rounded-lg border border-slate-800/70 bg-slate-900/80 p-4">
+            <div className="rounded-lg border border-border bg-background p-4">
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Verified buyers</p>
-              <p className="mt-2 text-3xl font-semibold text-white">
+              <p className="mt-2 text-3xl font-bold text-foreground">
                 {loading ? "-" : stats.verifiedBuyers}
               </p>
-              <p className="text-xs text-emerald-200/80">KYC Approved</p>
+              <p className="text-xs text-primary">KYC Approved</p>
             </div>
 
-            {/* Transactions (Week) */}
-            <div className="rounded-lg border border-slate-800/70 bg-slate-900/80 p-4">
+            <div className="rounded-lg border border-border bg-background p-4">
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Transactions (7d)</p>
-              <p className="mt-2 text-3xl font-semibold text-white">
+              <p className="mt-2 text-3xl font-bold text-foreground">
                 {loading ? "-" : stats.recentTransactions}
               </p>
-              <p className="text-xs text-emerald-200/80">Volume this week</p>
+              <p className="text-xs text-primary">Volume this week</p>
             </div>
 
-            {/* Total Revenue */}
-            <div className="rounded-lg border border-slate-800/70 bg-slate-900/80 p-4">
+            <div className="rounded-lg border border-border bg-background p-4">
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Total Revenue</p>
-              <p className="mt-2 text-3xl font-semibold text-white">
+              <p className="mt-2 text-3xl font-bold text-foreground">
                 {loading ? "-" : `${stats.totalRevenue.toLocaleString()} EGP`}
               </p>
-              <p className="text-xs text-emerald-200/80">Lifetime volume</p>
+              <p className="text-xs text-primary">Lifetime volume</p>
             </div>
 
           </CardContent>
         </Card>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-2"> 
         {[
           {
             title: "For Farmers",
@@ -139,15 +136,11 @@ function HomePage() {
           {
             title: "For Buyers",
             body: "Discover credible suppliers, compare offers, and request deals with full transparency.",
-          },
-          {
-            title: "For Admins",
-            body: "Review verifications, monitor marketplace health, and keep every transaction auditable.",
-          },
+          }
         ].map((item) => (
-          <Card key={item.title} className="border border-slate-800/70 bg-slate-950/70">
+          <Card key={item.title} className="border border-border bg-card shadow-sm">
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg">{item.title}</CardTitle>
+              <CardTitle className="text-lg text-foreground">{item.title}</CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground leading-relaxed">
               {item.body}
