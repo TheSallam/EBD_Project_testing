@@ -1,5 +1,7 @@
 const express = require('express');
 const Transaction = require('../models/Transaction');
+const Product = require('../models/Product');
+const { authMiddleware, requireRole } = require('../middleware/auth');
 const router = express.Router();
 
 // GET all transactions
@@ -14,10 +16,28 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST create transaction (record history)
-router.post('/', async (req, res) => {
+// POST create transaction (record history) - buyer only
+router.post('/', authMiddleware, requireRole('buyer'), async (req, res) => {
   try {
-    const transaction = new Transaction(req.body);
+    const { productId, quantityPurchased } = req.body;
+    if (!productId || !quantityPurchased) {
+      return res.status(400).json({ message: 'productId and quantityPurchased are required' });
+    }
+    const qty = Number(quantityPurchased);
+    if (Number.isNaN(qty) || qty <= 0) {
+      return res.status(400).json({ message: 'quantityPurchased must be a positive number' });
+    }
+    const product = await Product.findById(productId);
+    if (!product || product.isAvailable === false) {
+      return res.status(404).json({ message: 'Product not found or unavailable' });
+    }
+    const totalPrice = qty * Number(product.pricePerUnit || 0);
+    const transaction = new Transaction({
+      buyerId: req.user._id,
+      productId,
+      quantityPurchased: qty,
+      totalPrice,
+    });
     await transaction.save();
     res.status(201).json(transaction);
   } catch (error) {

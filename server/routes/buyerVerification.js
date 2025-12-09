@@ -4,8 +4,8 @@ const { authMiddleware, requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
-// GET all buyer verifications
-router.get('/', async (req, res) => {
+// GET all buyer verifications (admin only)
+router.get('/', authMiddleware, requireAdmin, async (req, res) => {
   try {
     const verifications = await BuyerVerification.find()
       .populate('buyerId', 'username email')

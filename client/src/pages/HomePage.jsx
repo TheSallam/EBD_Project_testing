@@ -1,7 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
+import { useAuthUser } from "@/lib/auth";
 
 function HomePage() {
+  const navigate = useNavigate();
+  const user = useAuthUser();
+
+  const goFarmer = () => navigate("/farmer");
+  const goBuyer = () => navigate("/market");
+  const goAdmin = () => navigate("/admin/verification");
+
   return (
     <div className="space-y-10">
       <section className="grid items-center gap-8 lg:grid-cols-[1.1fr,0.9fr]">
@@ -10,19 +19,41 @@ function HomePage() {
             Real-time, transparent agri-trade
           </div>
           <h1 className="text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">
-            Clean, modern marketplace for farmers and verified buyers
+            Clean, modern marketplace for farmers, buyers, and admins
           </h1>
           <p className="text-base leading-relaxed text-muted-foreground">
-            AgriFlow connects smallholder farmers directly with vetted buyers. Expect clear
-            pricing, secure digital payments, and transaction histories you can trust.
+            AgriFlow connects smallholder farmers directly with vetted buyers. Clear pricing, secure payments,
+            verifications, and transaction history all in one place.
           </p>
           <div className="flex flex-wrap gap-3">
-            <Button size="lg" className="bg-emerald-500 text-emerald-950 hover:bg-emerald-400" type="button">
-              Enter as Farmer (static)
+            <Button
+              size="lg"
+              className="bg-emerald-500 text-emerald-950 hover:bg-emerald-400"
+              type="button"
+              onClick={goFarmer}
+            >
+              {user?.role === "farmer" ? "Go to Farmer dashboard" : "Enter as Farmer"}
             </Button>
-            <Button size="lg" variant="secondary" className="border border-slate-800/80" type="button">
-              Enter as Buyer (static)
+            <Button
+              size="lg"
+              variant="secondary"
+              className="border border-slate-800/80"
+              type="button"
+              onClick={goBuyer}
+            >
+              Browse marketplace
             </Button>
+            {user?.role === "admin" && (
+              <Button
+                size="lg"
+                variant="outline"
+                className="border border-emerald-400/50 text-emerald-100"
+                type="button"
+                onClick={goAdmin}
+              >
+                Admin verification
+              </Button>
+            )}
           </div>
           <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-2 rounded-full bg-slate-900/70 px-3 py-1">

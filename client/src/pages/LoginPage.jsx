@@ -1,11 +1,16 @@
 import { useState } from "react";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { api } from "@/lib/api";
+import { useToast } from "@/components/ui/use-toast.jsx";
+import { saveAuth } from "@/lib/auth";
 
 function LoginPage() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [email, setEmail] = useState("buyer1@test.com");
   const [password, setPassword] = useState("123456");
   const [loading, setLoading] = useState(false);
@@ -17,20 +22,22 @@ function LoginPage() {
     setMessage(null);
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
+      const res = await api.post("/auth/login", {
         email,
         password,
       });
 
       const { token, user } = res.data;
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
+      saveAuth(token, user);
 
       setMessage({ type: "success", text: `Logged in as ${user.role} (${user.email})` });
+      toast({ title: "Logged in", description: `Welcome back, ${user.username || user.email}` });
+      navigate("/");
     } catch (err) {
       const text =
         err.response?.data?.message || "Login failed. Please check your credentials.";
       setMessage({ type: "error", text });
+      toast({ title: "Login failed", description: text });
     } finally {
       setLoading(false);
     }

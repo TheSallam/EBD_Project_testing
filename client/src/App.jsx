@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
@@ -7,8 +7,17 @@ import FarmerDashboardPage from "./pages/FarmerDashboardPage";
 import BuyerMarketplacePage from "./pages/BuyerMarketplacePage";
 import AdminVerificationPage from "./pages/AdminVerificationPage";
 import TransactionsPage from "./pages/TransactionsPage";
+import { useAuthUser, isLoggedIn } from "./lib/auth";
 
 function App() {
+  const user = useAuthUser();
+
+  const RequireAuth = ({ children, role }) => {
+    if (!isLoggedIn()) return <Navigate to="/login" replace />;
+    if (role && user?.role !== role) return <Navigate to="/" replace />;
+    return children;
+  };
+
   return (
     <div className="min-h-screen text-foreground">
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(80%_60%_at_50%_-10%,rgba(16,185,129,0.16),transparent),radial-gradient(50%_40%_at_90%_20%,rgba(94,234,212,0.1),transparent)]" />
@@ -34,9 +43,23 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/farmer" element={<FarmerDashboardPage />} />
+          <Route
+            path="/farmer"
+            element={
+              <RequireAuth role="farmer">
+                <FarmerDashboardPage />
+              </RequireAuth>
+            }
+          />
           <Route path="/market" element={<BuyerMarketplacePage />} />
-          <Route path="/admin/verification" element={<AdminVerificationPage />} />
+          <Route
+            path="/admin/verification"
+            element={
+              <RequireAuth role="admin">
+                <AdminVerificationPage />
+              </RequireAuth>
+            }
+          />
           <Route path="/transactions" element={<TransactionsPage />} />
         </Routes>
       </main>
