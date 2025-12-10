@@ -15,6 +15,17 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET my products (Farmer Dashboard) - NEW ROUTE
+router.get('/my-products', authMiddleware, requireRole('farmer'), async (req, res) => {
+  try {
+    // Return all products for this farmer, regardless of isAvailable status
+    const products = await Product.find({ farmerId: req.user._id }).sort({ dateListed: -1 });
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 // POST create product (Farmers only + Verified Check)
 router.post('/', authMiddleware, requireRole('farmer'), async (req, res) => {
   try {

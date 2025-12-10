@@ -20,12 +20,12 @@ function FarmerDashboardPage() {
   const fetchMyProducts = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/products");
-      // Filter client-side for now (or use the filtered endpoint if created)
-      const myProducts = res.data.filter(p => p.farmerId?._id === user._id || p.farmerId === user._id);
-      setProducts(myProducts);
+      // Updated to use the dedicated endpoint
+      const res = await api.get("/products/my-products");
+      setProducts(res.data);
     } catch (err) {
       console.error(err);
+      toast({ variant: "destructive", title: "Error", description: "Failed to load your products." });
     } finally {
       setLoading(false);
     }
@@ -39,7 +39,7 @@ function FarmerDashboardPage() {
     e.preventDefault();
     try {
       const res = await api.post("/products", formData);
-      setProducts([...products, res.data]);
+      setProducts([res.data, ...products]); // Prepend new product
       setFormData({ productName: "", pricePerUnit: "", quantity: "" });
       toast({ title: "Success", description: "Listing posted successfully!" });
     } catch (err) {
@@ -75,7 +75,7 @@ function FarmerDashboardPage() {
 
         <Card className="border border-slate-800/80 bg-slate-950/70">
           <CardHeader>
-            <CardTitle>Current Listings</CardTitle>
+            <CardTitle>My Listings</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
