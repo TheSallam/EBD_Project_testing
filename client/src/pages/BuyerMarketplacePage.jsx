@@ -18,15 +18,16 @@ function BuyerMarketplacePage() {
   const [page, setPage] = useState(1);
   const pageSize = 6;
 
-  const fetchProducts = async () => {
-    setLoading(true);
+  // UPDATED: Added 'isBackground' argument to prevent the spinner twitch
+  const fetchProducts = async (isBackground = false) => {
+    if (!isBackground) setLoading(true);
     try {
       const res = await api.get("/products");
       setProducts(res.data);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to load products.");
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   };
 
@@ -67,9 +68,23 @@ function BuyerMarketplacePage() {
 
     try {
       await api.post("/transactions", { productId: product._id, quantityPurchased: qty });
+      
       toast({ title: "Purchase successful!", description: `Bought ${qty}kg of ${product.productName}` });
+      
+      // Clear input
       handleQtyChange(product._id, "");
-      fetchProducts();
+
+      // OPTIMISTIC UPDATE: Update UI immediately so it feels instant
+      setProducts(prev => prev.map(p => {
+        if (p._id === product._id) {
+          return { ...p, quantity: p.quantity - qty };
+        }
+        return p;
+      }).filter(p => p.quantity > 0)); // Remove if quantity hits 0
+
+      // BACKGROUND REFRESH: Sync with server without showing spinner
+      fetchProducts(true);
+
     } catch (err) {
       const msg = err.response?.data?.message || "Request failed.";
       toast({ variant: "destructive", title: "Request failed", description: msg });
@@ -78,7 +93,6 @@ function BuyerMarketplacePage() {
 
   return (
     <div className="space-y-8">
-      {/* Search Header */}
       <header className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 shadow-lg shadow-primary/5 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.25em] text-primary">Buyer view</p>
