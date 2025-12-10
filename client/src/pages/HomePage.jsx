@@ -1,35 +1,11 @@
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useAuthUser } from "@/lib/auth";
-import { api } from "@/lib/api";
 
 function HomePage() {
   const navigate = useNavigate();
   const user = useAuthUser();
-  
-  const [stats, setStats] = useState({
-    activeListings: 0,
-    verifiedBuyers: 0,
-    recentTransactions: 0,
-    totalRevenue: 0
-  });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const res = await api.get("/stats");
-        setStats(res.data);
-      } catch (err) {
-        console.error("Failed to load stats", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStats();
-  }, []);
 
   const goFarmer = () => navigate("/farmer");
   const goBuyer = () => navigate("/market");
@@ -39,21 +15,20 @@ function HomePage() {
     <div className="space-y-10">
       <section className="grid items-center gap-8 lg:grid-cols-[1.1fr,0.9fr]">
         <div className="space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary shadow-sm">
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-100 shadow-sm shadow-emerald-500/20">
             Real-time, transparent agri-trade
           </div>
-          {/* Changed text-white to text-foreground */}
-          <h1 className="text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl">
+          <h1 className="text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">
             Clean, modern marketplace for farmers, buyers, and admins
           </h1>
           <p className="text-base leading-relaxed text-muted-foreground">
-            AgriFlow connects smallholder farmers directly with verified buyers. Clear pricing, secure payments,
+            AgriFlow connects smallholder farmers directly with vetted buyers. Clear pricing, secure payments,
             verifications, and transaction history all in one place.
           </p>
           <div className="flex flex-wrap gap-3">
             <Button
               size="lg"
-              className="bg-emerald-600 text-white hover:bg-emerald-500" 
+              className="bg-emerald-500 text-emerald-950 hover:bg-emerald-400"
               type="button"
               onClick={goFarmer}
             >
@@ -61,8 +36,8 @@ function HomePage() {
             </Button>
             <Button
               size="lg"
-              variant="outline"
-              className="border-border hover:bg-accent hover:text-accent-foreground"
+              variant="secondary"
+              className="border border-slate-800/80"
               type="button"
               onClick={goBuyer}
             >
@@ -72,7 +47,7 @@ function HomePage() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-primary/30 text-primary hover:bg-primary/5"
+                className="border border-emerald-400/50 text-emerald-100"
                 type="button"
                 onClick={goAdmin}
               >
@@ -80,54 +55,53 @@ function HomePage() {
               </Button>
             )}
           </div>
+          <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-2 rounded-full bg-slate-900/70 px-3 py-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              Instant verifications
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full bg-slate-900/70 px-3 py-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-sky-400" />
+              Clear audit trails
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full bg-slate-900/70 px-3 py-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+              Fair pricing cues
+            </span>
+          </div>
         </div>
 
-        {/* Updated Card colors: bg-card, border-border */}
-        <Card className="border border-border bg-card/50 shadow-xl shadow-primary/5 backdrop-blur-sm">
+        <Card className="border border-slate-800/70 bg-slate-950/60 shadow-xl shadow-emerald-500/10">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Live Market Activity</CardTitle>
-            <CardDescription>Real-time data from the platform.</CardDescription>
+            <CardTitle className="text-lg">Today&apos;s activity (static)</CardTitle>
+            <CardDescription>Signal-rich snapshot from our demo data.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
-            
-            {/* Stat Box */}
-            <div className="rounded-lg border border-border bg-background p-4">
+            <div className="rounded-lg border border-slate-800/70 bg-slate-900/80 p-4">
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Active listings</p>
-              <p className="mt-2 text-3xl font-bold text-foreground">
-                {loading ? "-" : stats.activeListings}
-              </p>
-              <p className="text-xs text-primary">Available now</p>
+              <p className="mt-2 text-3xl font-semibold text-white">32</p>
+              <p className="text-xs text-emerald-200/80">+4 today</p>
             </div>
-
-            <div className="rounded-lg border border-border bg-background p-4">
+            <div className="rounded-lg border border-slate-800/70 bg-slate-900/80 p-4">
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Verified buyers</p>
-              <p className="mt-2 text-3xl font-bold text-foreground">
-                {loading ? "-" : stats.verifiedBuyers}
-              </p>
-              <p className="text-xs text-primary">KYC Approved</p>
+              <p className="mt-2 text-3xl font-semibold text-white">12</p>
+              <p className="text-xs text-emerald-200/80">100% KYC checked</p>
             </div>
-
-            <div className="rounded-lg border border-border bg-background p-4">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">Transactions (7d)</p>
-              <p className="mt-2 text-3xl font-bold text-foreground">
-                {loading ? "-" : stats.recentTransactions}
-              </p>
-              <p className="text-xs text-primary">Volume this week</p>
+            <div className="rounded-lg border border-slate-800/70 bg-slate-900/80 p-4">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Transactions this week</p>
+              <p className="mt-2 text-3xl font-semibold text-white">18</p>
+              <p className="text-xs text-emerald-200/80">Stable volume</p>
             </div>
-
-            <div className="rounded-lg border border-border bg-background p-4">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">Total Revenue</p>
-              <p className="mt-2 text-3xl font-bold text-foreground">
-                {loading ? "-" : `${stats.totalRevenue.toLocaleString()} EGP`}
-              </p>
-              <p className="text-xs text-primary">Lifetime volume</p>
+            <div className="rounded-lg border border-slate-800/70 bg-slate-900/80 p-4">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Fulfillment score</p>
+              <p className="mt-2 text-3xl font-semibold text-white">94%</p>
+              <p className="text-xs text-emerald-200/80">On-time pickups</p>
             </div>
-
           </CardContent>
         </Card>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2"> 
+      <section className="grid gap-4 md:grid-cols-3">
         {[
           {
             title: "For Farmers",
@@ -136,11 +110,15 @@ function HomePage() {
           {
             title: "For Buyers",
             body: "Discover credible suppliers, compare offers, and request deals with full transparency.",
-          }
+          },
+          {
+            title: "For Admins",
+            body: "Review verifications, monitor marketplace health, and keep every transaction auditable.",
+          },
         ].map((item) => (
-          <Card key={item.title} className="border border-border bg-card shadow-sm">
+          <Card key={item.title} className="border border-slate-800/70 bg-slate-950/70">
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg text-foreground">{item.title}</CardTitle>
+              <CardTitle className="text-lg">{item.title}</CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground leading-relaxed">
               {item.body}

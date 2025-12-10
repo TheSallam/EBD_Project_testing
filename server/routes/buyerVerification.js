@@ -1,61 +1,43 @@
 const express = require('express');
 const BuyerVerification = require('../models/BuyerVerification');
-const User = require('../models/User'); 
 const { authMiddleware, requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
-// GET all users (farmers + buyers) + their verification status
+// GET all buyer verifications (admin only)
 router.get('/', authMiddleware, requireAdmin, async (req, res) => {
   try {
-    // 1. Fetch all users who are buyers OR farmers
-    const users = await User.find({ role: { $in: ['buyer', 'farmer'] } }).select('username email role _id');
-
-    // 2. Fetch all existing verification records
-    const verifications = await BuyerVerification.find();
-
-    // 3. Merge them
-    const results = users.map(user => {
-      // Find matching verification record (checking buyerId against user._id)
-      const record = verifications.find(v => v.buyerId.toString() === user._id.toString());
-      return {
-        userInfo: user, // Contains _id, username, email, role
-        verifiedStatus: record ? record.verifiedStatus : false,
-        verificationDate: record ? record.verificationDate : null,
-        _id: record ? record._id : null // verification doc ID
-      };
-    });
-
-    res.json(results);
+    const verifications = await BuyerVerification.find()
+      .populate('buyerId', 'username email')
+      .populate('verifiedBy', 'username');
+    res.json(verifications);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
-// PUT: Toggle verification status (Works for both farmers and buyers)
-router.put('/:userId', authMiddleware, requireAdmin, async (req, res) => {
+// POST verify buyer - ONLY ADMIN
+router.post('/:buyerId/verify', authMiddleware, requireAdmin, async (req, res) => {
   try {
-    const userId = req.params.userId;
-    const { status } = req.body; 
+    const buyerId = req.params.buyerId;
 
-    let verification = await BuyerVerification.findOne({ buyerId: userId });
+    let verification = await BuyerVerification.findOne({ buyerId });
 
     if (verification) {
-      verification.verifiedStatus = status;
-      verification.verificationDate = status ? new Date() : null;
-      verification.verifiedBy = req.user._id;
+      verification.verifiedStatus = true;
+      verification.verifiedBy = req.user._id;  // admin from token
+      verification.verificationDate = new Date();
     } else {
-      // Create new record using 'buyerId' field to store the user ID (reusing schema)
       verification = new BuyerVerification({
-        buyerId: userId, 
-        verifiedStatus: status,
-        verificationDate: status ? new Date() : null,
-        verifiedBy: req.user._id
+        buyerId,
+        verifiedStatus: true,
+        verifiedBy: req.user._id,
+        verificationDate: new Date()
       });
     }
 
     await verification.save();
-    res.json(verification);
+    res.status(201).json(verification);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
