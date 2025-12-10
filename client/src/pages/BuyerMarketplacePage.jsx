@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast.jsx";
+import ConfirmationModal from "@/components/ConfirmationModal";
 
 function BuyerMarketplacePage() {
   const { toast } = useToast();
@@ -17,6 +18,10 @@ function BuyerMarketplacePage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 6;
+
+  // Modal State
+  const [purchaseData, setPurchaseData] = useState(null); // { product, qty, total }
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // UPDATED: Added 'isBackground' argument to prevent the spinner twitch
   const fetchProducts = async (isBackground = false) => {
@@ -54,7 +59,7 @@ function BuyerMarketplacePage() {
     setQuantities(prev => ({ ...prev, [pid]: val }));
   };
 
-  const handleRequest = async (product) => {
+  const initiatePurchase = (product) => {
     const qty = Number(quantities[product._id] || 0);
 
     if (qty <= 0) {
@@ -65,6 +70,15 @@ function BuyerMarketplacePage() {
       toast({ variant: "destructive", title: "Stock exceeded", description: `Only ${product.quantity} kgs available.` });
       return;
     }
+
+    const total = (qty * product.pricePerUnit).toFixed(2);
+    setPurchaseData({ product, qty, total });
+    setIsModalOpen(true);
+  };
+
+  const handleConfirmPurchase = async () => {
+    if (!purchaseData) return;
+    const { product, qty } = purchaseData;
 
     try {
       await api.post("/transactions", { productId: product._id, quantityPurchased: qty });
@@ -93,6 +107,16 @@ function BuyerMarketplacePage() {
 
   return (
     <div className="space-y-8">
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleConfirmPurchase}
+        title="Confirm Purchase"
+        description={purchaseData ? `You are about to buy ${purchaseData.qty}kg of ${purchaseData.product.productName} from ${purchaseData.product.farmerId?.username || "Farmer"} for a total of ${purchaseData.total} EGP.` : ""}
+        confirmText="Confirm Purchase"
+        variant="default"
+      />
+
       <header className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 shadow-lg shadow-primary/5 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.25em] text-primary">Buyer view</p>
@@ -182,9 +206,9 @@ function BuyerMarketplacePage() {
                   variant="secondary"
                   className="w-full bg-secondary hover:bg-secondary/80 text-secondary-foreground border border-border"
                   type="button"
-                  onClick={() => handleRequest(p)}
+                  onClick={() => initiatePurchase(p)}
                 >
-                  Confirm Purchase
+                  Purchase
                 </Button>
               </CardFooter>
             </Card>
